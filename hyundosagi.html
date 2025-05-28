@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>현도사기(賢都史記)</title>
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap');
+
+    body {
+      margin: 0;
+      padding: 40px;
+      background: #f5f0e6 url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+      font-family: 'Noto Serif KR', serif;
+      color: #2c1d0a;
+      line-height: 1.9;
+      cursor: pointer;
+      position: relative; /* floating-hanja absolute 기준 */
+      min-height: 100vh;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    html, body {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hanja {
+      position: absolute;
+      font-family: 'Noto Serif KR', serif;
+      white-space: pre;
+      user-select: none;
+      pointer-events: none;
+      z-index: -1;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    #hanja-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: -99; /* 콘텐츠보다 뒤에 위치 */
+      overflow: hidden;
+    }
+
+    @keyframes floatUpDown {
+      0%   { transform: translateY(0); }
+      50%  { transform: translateY(-25px); }
+      100% { transform: translateY(0); }
+    }
+
+    .wrapper {
+      max-width: 900px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 40px;
+      border: 3px solid #a88c64;
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 6px;
+      margin-top: 40px;
+    }
+
+    .note {
+      text-align: center;
+      font-style: italic;
+      color: #7a6a56;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2e8dc;
+    }
+
+    pre {
+      background: #fcfaf7;
+      padding: 15px;
+      border-left: 4px solid #a88c64;
+      white-space: pre-wrap;
+      font-size: 1.05rem;
+    }
+
+    #infoText1, #infoText2, #infoText3, #infoText4 {
+        text-align: center;
+        color: #7a6a56;
+        margin-bottom: 30px;
+        position: relative;
+        left: 26%;
+        transform: translateX(-50%);
+        margin: 0 20px;
+    }
+
+    pre {
+        font-family: 'Noto Serif KR', serif;
+        white-space: pre-wrap;
+    }
+
+    .toggle-content {
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        padding: 0 15px;
+        transition: max-height 0.5s cubic-bezier(.4,0,.2,1), opacity 0.4s, padding 0.3s;
+    }
+    .toggle-content.open {
+        max-height: 2000px;  /* 내용이 아무리 많아도 충분히 들어갈 크기 */
+        opacity: 1;
+        padding: 15px 15px;
+    }
+
+    @font-face {
+      font-family: 'Korean';
+      src: url('assets/fonts/GeneralKimJwajin_Bold.ttf') format('truetype');
+    }
+
+    @font-face {
+      font-family: 'Hanja';
+      src: url('assets/fonts/Special Semi-Cursive Script (Writing Brush) HiraginoGyoDS Font-Traditional Chinese.ttc') format('truetype');
+    }
+
+    .main-nav {
+      width: 100%;
+      background: linear-gradient(90deg, #ecdcbc 0%, #f6e6cc 100%);
+      border-bottom: 2px solid #a88c64;
+      box-shadow: 0 2px 12px rgba(180,140,80,0.07);
+      font-family: 'Noto Serif KR', serif;
+      margin-bottom: 36px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      position: relative;
+      min-height: 62px;
+    }
+
+    .nav-dragon {
+      display: flex;
+      align-items: center;
+      padding: 0 24px 0 20px;
+    }
+
+    .nav-dragon svg {
+      filter: drop-shadow(0 2px 4px rgba(168,140,100,0.12));
+    }
+
+    .main-nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+
+    .main-nav > ul > li {
+      position: relative;
+    }
+
+    .main-nav > ul > li > a {
+      display: block;
+      padding: 18px 38px;
+      text-decoration: none !important;
+      color: #6b461a;
+      font-weight: 700;
+      font-size: 1.18rem;
+      transition: background 0.2s, color 0.18s;
+      border-bottom: none !important;
+      letter-spacing: 1px;
+    }
+    .main-nav > ul > li > a:hover {
+      background: #ebdbba;
+      color: #a88c64;
+    }
+    .main-nav ul ul {
+      display: none;
+      position: absolute;
+      background: #fff8ed;
+      min-width: 180px;
+      border: 1px solid #d8bb90;
+      border-top: none;
+      box-shadow: 2px 6px 16px rgba(170,140,100,0.11);
+      top: 100%;
+      left: 0;
+      z-index: 200;
+      border-radius: 0 0 13px 13px;
+      overflow: hidden;
+    }
+    .main-nav ul ul li a {
+      padding: 13px 28px;
+      color: #6b461a;
+      font-weight: 400;
+      font-size: 1.09rem;
+      display: block;
+      white-space: nowrap;
+      text-decoration: none !important;
+      border-bottom: none !important;
+      background: none;
+      transition: background 0.16s, color 0.14s;
+    }
+    .main-nav ul ul li a:hover {
+      background: #f5e1bc;
+      color: #bb995e;
+    }
+    .main-nav ul li:hover > ul,
+    .main-nav ul li:focus-within > ul {
+      display: block;
+    }
+
+    /* 모바일 대응 */
+    @media (max-width: 700px) {
+      .main-nav {
+        flex-direction: column;
+        min-height: unset;
+        padding: 0;
+      }
+      .nav-dragon {
+        padding: 14px 0 4px 0;
+      }
+      .main-nav ul {
+        flex-direction: column;
+        width: 100%;
+      }
+      .main-nav > ul > li > a {
+        padding: 14px 0;
+        text-align: center;
+      }
+    }
+
+    .main-header {
+      width: 100%;
+      background: linear-gradient(90deg, #e5dac4 0%, #f2ecdd 100%);
+      border-bottom: 3px solid #bda370;
+      box-shadow: 0 2px 12px rgba(190,165,120,0.12);
+      padding: 0;
+      z-index: 110;
+      position: relative;
+    }
+
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 26px 38px 22px 18px;
+      gap: 26px;
+    }
+
+    .header-dragon {
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e6d2b6;
+      border-radius: 30%;
+      box-shadow: 0 2px 8px rgba(186,151,80,0.10);
+      padding: 13px 15px 13px 13px;
+      border: 2px solid #c1ab83;
+    }
+
+    .header-title {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .header-title > div:first-child {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .header-desc {
+      font-family: 'Noto Serif KR', serif;
+      color: #98805c;
+      font-size: 1.13rem;
+      margin-top: 5px;
+      margin-left: 4px;
+      letter-spacing: 1.2px;
+    }
+
+    @media (max-width: 700px) {
+      .header-inner {
+        flex-direction: column;
+        gap: 10px;
+        padding: 19px 6vw 12px 6vw;
+      }
+      .header-dragon {
+        padding: 7px 9px 7px 7px;
+      }
+      .header-title > div:first-child {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+      .header-desc {
+        text-align: center;
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="hanja-container"></div>
+  <header class="main-header">
+    <div class="header-inner">
+      <div class="header-dragon">
+        <!-- 용 SVG 아이콘 -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 64 64">
+          <g>
+            <path d="M33 6c-4 2-7 9-4 13 3 4 7-2 6-6 8 8 14 11 17 15 4 5 0 11-8 14-8 2-20-3-23-5-3-1-7 0-7 4 0 3 5 8 14 11-3 1-6 5-4 8 2 4 13 4 20-3 5-5 5-10 3-12 5 2 9-1 10-4 1-4-4-9-13-9-5 0-10 2-13 6" fill="#b69b6c" stroke="#886125" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <ellipse cx="25" cy="38" rx="1.2" ry="1.6" fill="#886125"/>
+            <ellipse cx="43" cy="19" rx="1.5" ry="2" fill="#886125"/>
+          </g>
+        </svg>
+      <div class="header-title">
+        <div>
+          <span style="font-family: 'Korean'; font-weight: bold; font-size: 2.2rem;">현도사기</span>
+          <span style="font-family: 'Hanja'; font-weight: bold; font-size: 1.5rem; margin-left: 7px; color: #93744e;">(賢都史記)</span>
+        </div>
+        <div class="header-desc">성균관의 역사, 인성관의 시작</div>
+      </div>
+    </div>
+  </header>
+  <nav class="main-nav">
+    <div class="nav-dragon">
+      <!-- 동양풍 용 SVG 아이콘 (컬러, 투명도 조절) -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 64 64" style="vertical-align:middle;">
+        <g>
+          <path d="M33 6c-4 2-7 9-4 13 3 4 7-2 6-6 8 8 14 11 17 15 4 5 0 11-8 14-8 2-20-3-23-5-3-1-7 0-7 4 0 3 5 8 14 11-3 1-6 5-4 8 2 4 13 4 20-3 5-5 5-10 3-12 5 2 9-1 10-4 1-4-4-9-13-9-5 0-10 2-13 6" fill="#c8a063" stroke="#7c5c27" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <ellipse cx="25" cy="38" rx="1.2" ry="1.6" fill="#7c5c27"/>
+          <ellipse cx="43" cy="19" rx="1.5" ry="2" fill="#7c5c27"/>
+        </g>
+      </svg>
+    </div>
+    <ul>
+      <li>
+        <a href="main.html">현도왕조실록</a>
+        <ul>
+          <li><a href="taejo.html">태조실록(太祖實錄)</a></li>
+          <li><a href="dojong.html">도종실록(道宗實錄)</a></li>
+          <li><a href="munjo.html">문조실록(文祖實錄)</a></li>
+          <li><a href="seongjong.html">성종실록(成宗實錄)</a></li>
+          <li><a href="gyeongjong.html">경종실록(敬宗實錄)</a></li>
+          <li><a href="onjo.html">온조실록(穩祖實錄)</a></li>
+          <li><a href="hyeokjong.html">혁종실록(革宗實錄)</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#">별지</a>
+        <ul>
+          <li><a href="seonggyungwan.html">성균관기(成均館記)</a></li>
+          <li><a href="hyundosagi.html">현도사기(賢都史記)</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="wrapper">
+    <h1>
+      <span style="font-family: 'Korean'; font-weight: bold;">현도사기</span>
+      <span style="font-family: 'Hanja'; font-weight: bold;">(賢都史記)</span>
+    </h1>
+    <div class="note">아래 글씨를 클릭하면 배경 음악이 재생됩니다 🎵</div>
+    <span id="infoText1">[ 풍악 1 ]</span>
+    <span id="infoText2">[ 풍악 2 ]</span>
+    <span id="infoText3">[ 풍악 3 ]</span>
+    <span id="infoText4">[ 풍악 4 ]</span>
+
+    <h2 class="toggle-title">『 기록 』</h2>
+    <div class="toggle-content">
+    <pre>
+[ 박쥐사건 ]
+온조3년 ○월 ○일
+
+이 날, 성균관 제1실(室)에서 뜻밖의 일이 벌어졌다.
+학도 김동현이 라디에이터 근방에서 이질스러운 날갯짓 소리를 듣고, 그 뒤를 들추어 보았더니, 그 속에 괴이한 박쥐 한 마리가 잠복해 있었다.
+곧 방 안은 아수라장이 되어, 함께 생활하던 학도 김지섭, 이상윤과 유생 안동규 또한 크게 놀라 방을 빠져나왔다.
+박쥐는 방 안을 날며 찍찍거렸고, 성균관 전체에 소동이 번졌다.
+현장에 있었던 사관 김동현이 훗날 말하길,
+“나는 그 날, 왜 박쥐가 박‘쥐’인지 몸소 깨달았노라.” 하였다.
+곧 사감 장의군(莊義君, 강대승)께서 현장에 당도하였고, 박쥐의 기이한 움직임에 놀라 소스라치게 물러섰다.
+이에 학궁의 질서를 수호하고자 관리 이은수가 앞장섰으며, 학도 김동현, 김지섭, 이상윤과 더불어 쓰레기통을 이용하여 박쥐를 포획하도록 지시하였다.
+그들은 박스를 깔고 쓰레기통을 덮은 뒤, 구호를 맞추어 성균관 밖으로 박쥐를 내보내기로 하였다.
+“하나... 둘... 셋!”
+호령이 떨어지자, 학도들은 괴성을 지르며 박쥐가 든 통을 밖으로 던지고, 곧장 실내로 도주하였다.
+소란이 진정되자, 생도들은 서로의 용맹함을 자찬하며 숨을 골랐다.
+그러나 관리 이은수는 장의군의 태도를 꾸짖으며,
+“어찌 사감이 나서지 않고, 생도들로 하여금 이 일을 맡기느냐?”고 분노하였다.
+이후 박쥐가 역병을 옮긴다는 소문이 퍼지자 성균관 전체에 공포가 감돌았고,
+학생들은 이불을 털고, 방안을 물수건으로 소독하였다.
+다음날, 성균관 학생들은 온조(穩祖, 박구용)께 상소를 올려 기숙사 방역을 요청하였다.
+일주일이 지나, 온조께서 “기숙사 소독이 완료되었도다.” 하시니,
+성균관 내의 온 생도들이 뛸듯이 기뻐하며, 다시 안심하고 학업에 전념할 수 있음을 감사히 여겼다.
+이 사건은 세간에 ‘박쥐사건(蝙蝠事件)’이라 전해진다.
+
+
+[ 눈 퇴학사건 ]
+온조3년 ○월 ○일
+
+이 날, 성균관 생도들은 아침에 일어나, 조회 전까지 지하 진로실에서 학문을 닦는 일과를 따르고 있었다.
+ 당일 아침, 인경대군(仁敬大君, 김윤정)께서는 사비로 생도들에게 아침 간식을 하사하였고, 이를 접한 생도들은 크나큰 존경심을 품었다.
+공부에 열중하던 중, 한 학도가 갑자기 말하기를,
+ “밖에 첫눈이 내리고 있나이다.” 하였으며, 이에 일부 생도들의 눈빛이 흔들리기 시작하였다.
+그 광경을 목도한 인경대군께서는 자리에서 벌떡 일어나시더니,
+ 진로실 문을 박차고 밖으로 나가 외치시길,
+“야! 눈! 너 퇴학!”
+하시고는 아무 일 없었다는 듯 다시 진로실로 들어오셨다.
+ 이 모습을 본 생도들은 일제히 웃음을 터뜨렸으며,
+ 인경대군께서는 덧붙여 말씀하시기를,
+“봤지? 선생님은 눈도 퇴학시키는 쌤이야!”
+라고 하였다.
+이윽고 조회 시간이 다가오자 생도들은 학습을 마치고 밖으로 나갔는데,
+ 놀랍게도, 방금 전까지 내리던 눈이 자취도 없이 그쳐 있었으니,
+ 모두가 놀라움 속에 서로를 바라보며 허탈한 웃음을 지었다.
+결국 성균관 생도들은 눈의 퇴학으로 인해 첫눈을 보지 못한 유일한 세대로 기록되었으며,
+ 그 날 이후로 “눈마저 퇴학시키는 자, 그가 인경대군이시다.”라는 말이 성균관에 전해 내려오고 있다.
+이 일을 후세는 ‘눈 퇴학사건(雪退學事件)’이라 부른다.
+    </pre>
+    </div>
+
+<h2>1기</h2>
+<table>
+  <tr>
+    <th>학년</th>
+    <th>이름</th>
+  </tr>
+  <tr>
+    <td>관리(3학년)</td>
+    <td>이은수</td>
+  </tr>
+  <tr>
+    <td>유생(2학년)</td>
+    <td>안동규</td>
+  </tr>
+  <tr>
+    <td>유생(2학년)</td>
+    <td>조건행</td>
+  </tr>
+  <tr>
+    <td>유생(2학년)</td>
+    <td>김윤수</td>
+  </tr>
+  <tr>
+    <td>유생(2학년)</td>
+    <td>이현승</td>
+  </tr>
+  <tr>
+    <td>학도(1학년)</td>
+    <td>김지섭</td>
+  </tr>
+  <tr>
+    <td>학도(1학년)</td>
+    <td>김동현</td>
+  </tr>
+  <tr>
+    <td>학도(1학년)</td>
+    <td>황희건</td>
+  </tr>
+  <tr>
+    <td>학도(1학년)</td>
+    <td>이동빈</td>
+  </tr>
+</table>
+
+<h2>2기</h2>
+<table>
+  <tr>
+    <th>학년</th>
+    <th>이름</th>
+  </tr>
+  <tr>
+    <td>관리(3학년)</td>
+    <td>이은수</td>
+  </tr>
+  <tr>
+    <td>유생(2학년)</td>
+    <td>안동규</td>
+  </tr>
+    <tr>
+    <td>유생(2학년)</td>
+    <td>박태홍</td>
+  </tr>
+    <tr>
+    <td>학도(1학년)</td>
+    <td>김지섭</td>
+  </tr>
+  <tr>
+    <td>학도(1학년)</td>
+    <td>김동현</td>
+  </tr>
+</table>
+
+<h2>3기</h2>
+<table>
+  <tr>
+    <th>학년</th>
+    <th>이름</th>
+  </tr>
+  <tr>
+    <td>관리(3학년)</td>
+    <td>안동규</td>
+  </tr>
+  <tr>
+    <td>유생(2학년)</td>
+    <td>김지섭</td>
+  </tr>
+  <tr>
+    <td>유생(2학년)</td>
+    <td>김동현</td>
+  </tr>
+    <tr>
+    <td>학도(1학년)</td>
+    <td>안동현</td>
+  </tr>
+  <tr>
+    <td>학도(1학년)</td>
+    <td>이주원</td>
+  </tr>
+  <tr>
+    <td>학도(1학년)</td>
+    <td>오주현</td>
+  </tr>
+  <tr>
+    <td>학도(1학년)</td>
+    <td>신진원</td>
+  </tr>
+</table>
+
+<h2>관리</h2>
+<table>
+  <tr>
+    <th>년도</th>
+    <th>관리</th>
+    <th>실세</th>
+  </tr>
+  <tr>
+    <td>온조 3년(2024) / 1, 2기</td>
+    <td>정화군(貞和君, 송미순)</td>
+    <td>인경대군(仁敬大君, 김윤정)</td>
+  </tr>
+  <tr>
+    <td>혁종 1년(2025) / 3기</td>
+    <td>영성군(永成君, 이정민)</td>
+    <td>정헌대군(正憲大君, 최재황)</td>
+  </tr>
+</table>
+  </div>
+
+  <script>
+const musicFiles = [
+  { key: 'music1', file: 'assets/sounds/music1.mp3' },
+  { key: 'music2', file: 'assets/sounds/music2.mp3' },
+  { key: 'music3', file: 'assets/sounds/music3.mp3' },
+  { key: 'music4', file: 'assets/sounds/music4.mp3' }
+];
+
+// 항상 localStorage에서 가장 최신의 곡 key로 audio 생성
+const lastMusicKey = localStorage.getItem('music_key') || 'music1';
+const lastTime = parseFloat(localStorage.getItem('music_time') || '0');
+const musicInfo = musicFiles.find(m => m.key === lastMusicKey) || musicFiles[0];
+const audio = new Audio(musicInfo.file);
+audio.loop = true;
+audio.currentTime = lastTime;
+
+// 자동 재생 여부 체크
+if (localStorage.getItem('music_playing') === 'true') {
+  audio.play();
+}
+
+// playMusic 함수는 무조건 localStorage.music_key를 최신 값으로!
+function playMusic(key) {
+  const info = musicFiles.find(m => m.key === key);
+  if (!info) return;
+
+  if (audio.src.includes(info.file)) {
+    // 이미 같은 곡을 선택했을 때 (토글 재생/정지)
+    if (audio.paused) {
+      audio.play();
+      localStorage.setItem('music_playing', 'true');
+    } else {
+      audio.pause();
+      localStorage.setItem('music_playing', 'false');
+    }
+    // 무조건 현재 곡 key 저장!
+    localStorage.setItem('music_key', key);
+    localStorage.setItem('music_time', audio.currentTime);
+  } else {
+    // 곡이 바뀌면 새로운 곡으로 세팅
+    audio.pause();
+    audio.src = info.file;
+    audio.currentTime = 0;
+    audio.play();
+    localStorage.setItem('music_key', key);
+    localStorage.setItem('music_time', 0);
+    localStorage.setItem('music_playing', 'true');
+  }
+}
+
+// 버튼 이벤트 할당 (중복 정의/함수 선언 NO)
+document.getElementById('infoText1').onclick = () => playMusic('music1');
+document.getElementById('infoText2').onclick = () => playMusic('music2');
+document.getElementById('infoText3').onclick = () => playMusic('music3');
+document.getElementById('infoText4').onclick = () => playMusic('music4');
+
+// audio 상태가 변할 때마다 항상 최신값 저장!
+audio.addEventListener('pause', () => {
+  localStorage.setItem('music_playing', 'false');
+  localStorage.setItem('music_time', audio.currentTime);
+  // 현재 곡이 뭔지 항상 반영
+  const currentKey = musicFiles.find(m => audio.src.includes(m.file))?.key;
+  if (currentKey) localStorage.setItem('music_key', currentKey);
+});
+audio.addEventListener('play', () => {
+  localStorage.setItem('music_playing', 'true');
+  // 현재 곡이 뭔지 항상 반영
+  const currentKey = musicFiles.find(m => audio.src.includes(m.file))?.key;
+  if (currentKey) localStorage.setItem('music_key', currentKey);
+});
+
+// 페이지 떠날 때 항상 최신 음악 정보를 저장
+window.addEventListener('beforeunload', () => {
+  localStorage.setItem('music_time', audio.currentTime);
+  localStorage.setItem('music_playing', !audio.paused ? 'true' : 'false');
+  const currentKey = musicFiles.find(m => audio.src.includes(m.file))?.key;
+  if (currentKey) localStorage.setItem('music_key', currentKey);
+});
+
+
+// 토글 제목 클릭시 내용 열고 닫기
+document.querySelectorAll('.toggle-title').forEach(title => {
+  title.addEventListener('click', () => {
+    const content = title.nextElementSibling;
+    if (content && content.classList.contains('toggle-content')) {
+      content.classList.toggle('open');
+      // 화살표 등 시각적 효과를 원하면 title에 .active 등 추가 가능
+      title.classList.toggle('active');
+    }
+  });
+});
+  </script>
+</body>
+</html>

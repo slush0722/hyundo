@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>현도왕조실록(賢都王朝實錄)</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap');
+
+    body {
+      margin: 0;
+      padding: 40px;
+      background: #f5f0e6 url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+      font-family: 'Noto Serif KR', serif;
+      color: #2c1d0a;
+      line-height: 1.9;
+      cursor: pointer;
+      position: relative; /* floating-hanja absolute 기준 */
+      min-height: 100vh;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    html, body {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hanja {
+      position: absolute;
+      font-family: 'Noto Serif KR', serif;
+      white-space: pre;
+      user-select: none;
+      pointer-events: none;
+      z-index: -1;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    #hanja-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: -99; /* 콘텐츠보다 뒤에 위치 */
+      overflow: hidden;
+    }
+
+    @keyframes floatUpDown {
+      0%   { transform: translateY(0); }
+      50%  { transform: translateY(-25px); }
+      100% { transform: translateY(0); }
+    }
+
+    .wrapper {
+      max-width: 900px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 40px;
+      border: 3px solid #a88c64;
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 6px;
+      margin-top: 40px;
+    }
+
+    .note {
+      text-align: center;
+      font-style: italic;
+      color: #7a6a56;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2e8dc;
+    }
+
+    pre {
+      background: #fcfaf7;
+      padding: 15px;
+      border-left: 4px solid #a88c64;
+      white-space: pre-wrap;
+      font-size: 1.05rem;
+    }
+
+    #infoText1, #infoText2, #infoText3, #infoText4 {
+        text-align: center;
+        color: #7a6a56;
+        margin-bottom: 30px;
+        position: relative;
+        left: 26%;
+        transform: translateX(-50%);
+        margin: 0 20px;
+    }
+
+    pre {
+        font-family: 'Noto Serif KR', serif;
+        white-space: pre-wrap;
+    }
+
+    .toggle-content {
+      overflow: hidden;
+      height: 0;
+      padding: 0;
+      transition: height 0.5s ease, padding 0.3s ease;
+    }
+    
+    .toggle-content.open {
+      max-height: 10000000px; /* 충분히 큰 값으로 설정 */
+      padding: 15px;
+    }
+
+    @font-face {
+      font-family: 'Korean';
+      src: url('assets/fonts/GeneralKimJwajin_Bold.ttf') format('truetype');
+    }
+
+    @font-face {
+      font-family: 'Hanja';
+      src: url('assets/fonts/Special Semi-Cursive Script (Writing Brush) HiraginoGyoDS Font-Traditional Chinese.ttc') format('truetype');
+    }
+
+    .main-nav {
+      width: 100%;
+      background: linear-gradient(90deg, #ecdcbc 0%, #f6e6cc 100%);
+      border-bottom: 2px solid #a88c64;
+      box-shadow: 0 2px 12px rgba(180,140,80,0.07);
+      font-family: 'Noto Serif KR', serif;
+      margin-bottom: 36px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      position: relative;
+      min-height: 62px;
+    }
+
+    .nav-dragon {
+      display: flex;
+      align-items: center;
+      padding: 0 24px 0 20px;
+    }
+
+    .nav-dragon svg {
+      filter: drop-shadow(0 2px 4px rgba(168,140,100,0.12));
+    }
+
+    .main-nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+
+    .main-nav > ul > li {
+      position: relative;
+    }
+
+    .main-nav > ul > li > a {
+      display: block;
+      padding: 18px 38px;
+      text-decoration: none !important;
+      color: #6b461a;
+      font-weight: 700;
+      font-size: 1.18rem;
+      transition: background 0.2s, color 0.18s;
+      border-bottom: none !important;
+      letter-spacing: 1px;
+    }
+    .main-nav > ul > li > a:hover {
+      background: #ebdbba;
+      color: #a88c64;
+    }
+    .main-nav ul ul {
+      display: none;
+      position: absolute;
+      background: #fff8ed;
+      min-width: 180px;
+      border: 1px solid #d8bb90;
+      border-top: none;
+      box-shadow: 2px 6px 16px rgba(170,140,100,0.11);
+      top: 100%;
+      left: 0;
+      z-index: 200;
+      border-radius: 0 0 13px 13px;
+      overflow: hidden;
+    }
+    .main-nav ul ul li a {
+      padding: 13px 28px;
+      color: #6b461a;
+      font-weight: 400;
+      font-size: 1.09rem;
+      display: block;
+      white-space: nowrap;
+      text-decoration: none !important;
+      border-bottom: none !important;
+      background: none;
+      transition: background 0.16s, color 0.14s;
+    }
+    .main-nav ul ul li a:hover {
+      background: #f5e1bc;
+      color: #bb995e;
+    }
+    .main-nav ul li:hover > ul,
+    .main-nav ul li:focus-within > ul {
+      display: block;
+    }
+
+    /* 모바일 대응 */
+    @media (max-width: 700px) {
+      .main-nav {
+        flex-direction: column;
+        min-height: unset;
+        padding: 0;
+      }
+      .nav-dragon {
+        padding: 14px 0 4px 0;
+      }
+      .main-nav ul {
+        flex-direction: column;
+        width: 100%;
+      }
+      .main-nav > ul > li > a {
+        padding: 14px 0;
+        text-align: center;
+      }
+    }
+
+    .main-header {
+      width: 100%;
+      background: linear-gradient(90deg, #e5dac4 0%, #f2ecdd 100%);
+      border-bottom: 3px solid #bda370;
+      box-shadow: 0 2px 12px rgba(190,165,120,0.12);
+      padding: 0;
+      z-index: 110;
+      position: relative;
+    }
+
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 26px 38px 22px 18px;
+      gap: 26px;
+    }
+
+    .header-dragon {
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e6d2b6;
+      border-radius: 30%;
+      box-shadow: 0 2px 8px rgba(186,151,80,0.10);
+      padding: 13px 15px 13px 13px;
+      border: 2px solid #c1ab83;
+    }
+
+    .header-title {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .header-title > div:first-child {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .header-desc {
+      font-family: 'Noto Serif KR', serif;
+      color: #98805c;
+      font-size: 1.13rem;
+      margin-top: 5px;
+      margin-left: 4px;
+      letter-spacing: 1.2px;
+    }
+
+    @media (max-width: 700px) {
+      .header-inner {
+        flex-direction: column;
+        gap: 10px;
+        padding: 19px 6vw 12px 6vw;
+      }
+      .header-dragon {
+        padding: 7px 9px 7px 7px;
+      }
+      .header-title > div:first-child {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+      .header-desc {
+        text-align: center;
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="hanja-container"></div>
+  <header class="main-header">
+    <div class="header-inner">
+      <div class="header-dragon">
+        <!-- 용 SVG 아이콘 -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 64 64">
+          <g>
+            <path d="M33 6c-4 2-7 9-4 13 3 4 7-2 6-6 8 8 14 11 17 15 4 5 0 11-8 14-8 2-20-3-23-5-3-1-7 0-7 4 0 3 5 8 14 11-3 1-6 5-4 8 2 4 13 4 20-3 5-5 5-10 3-12 5 2 9-1 10-4 1-4-4-9-13-9-5 0-10 2-13 6" fill="#b69b6c" stroke="#886125" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <ellipse cx="25" cy="38" rx="1.2" ry="1.6" fill="#886125"/>
+            <ellipse cx="43" cy="19" rx="1.5" ry="2" fill="#886125"/>
+          </g>
+        </svg>
+      </div>
+      <div class="header-title">
+        <div>
+          <span style="font-family: 'Korean'; font-weight: bold; font-size: 2.2rem;">현도왕조실록</span>
+          <span style="font-family: 'Hanja'; font-weight: bold; font-size: 1.5rem; margin-left: 7px; color: #93744e;">(賢都王朝實錄)</span>
+        </div>
+        <div class="header-desc">학궁의 기록, 그리고 이야기</div>
+      </div>
+    </div>
+  </header>
+  <nav class="main-nav">
+    <div class="nav-dragon">
+      <!-- 동양풍 용 SVG 아이콘 (컬러, 투명도 조절) -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 64 64" style="vertical-align:middle;">
+        <g>
+          <path d="M33 6c-4 2-7 9-4 13 3 4 7-2 6-6 8 8 14 11 17 15 4 5 0 11-8 14-8 2-20-3-23-5-3-1-7 0-7 4 0 3 5 8 14 11-3 1-6 5-4 8 2 4 13 4 20-3 5-5 5-10 3-12 5 2 9-1 10-4 1-4-4-9-13-9-5 0-10 2-13 6" fill="#c8a063" stroke="#7c5c27" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <ellipse cx="25" cy="38" rx="1.2" ry="1.6" fill="#7c5c27"/>
+          <ellipse cx="43" cy="19" rx="1.5" ry="2" fill="#7c5c27"/>
+        </g>
+      </svg>
+    </div>
+    <ul>
+      <li>
+        <a href="main.html">현도왕조실록</a>
+        <ul>
+          <li><a href="taejo.html">태조실록(太祖實錄)</a></li>
+          <li><a href="dojong.html">도종실록(道宗實錄)</a></li>
+          <li><a href="munjo.html">문조실록(文祖實錄)</a></li>
+          <li><a href="seongjong.html">성종실록(成宗實錄)</a></li>
+          <li><a href="gyeongjong.html">경종실록(敬宗實錄)</a></li>
+          <li><a href="onjo.html">온조실록(穩祖實錄)</a></li>
+          <li><a href="hyeokjong.html">혁종실록(革宗實錄)</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#">별지</a>
+        <ul>
+          <li><a href="seonggyungwan.html">성균관기(成均館記)</a></li>
+          <li><a href="hyundosagi.html">현도사기(賢都史記)</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="wrapper">
+    <h1>현도왕조실록(賢都王朝實錄)</h1>
+    <div class="note">아래 글씨를 클릭하면 배경 음악이 재생됩니다 🎵</div>
+    <span id="infoText1">[ 풍악 1 ]</span>
+    <span id="infoText2">[ 풍악 2 ]</span>
+    <span id="infoText3">[ 풍악 3 ]</span>
+    <span id="infoText4">[ 풍악 4 ]</span>
+
+    <h2>왕 (교장)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>대수</th><th>묘호</th><th>이름</th><th>재위기간</th><th>년도</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1대</td><td>태조(太祖)</td><td>김평곤</td><td>1993.3.2 ~ 2002.3.1</td><td>태조10년</td></tr>
+        <tr><td>2대</td><td>도종(道宗)</td><td>손도연</td><td>2002.3.2 ~ 2008.3.1</td><td>도종7년</td></tr>
+        <tr><td>3대</td><td>문조(文祖)</td><td>한영호</td><td>2008.3.3 ~ 2016.2.29</td><td>문조9년</td></tr>
+        <tr><td>4대</td><td>성종(成宗)</td><td>김상웅</td><td>2016.3.1 ~ 2020.2.29</td><td>성종5년</td></tr>
+        <tr><td>5대</td><td>경종(敬宗)</td><td>김태일</td><td>2020.3.1 ~ 2022.2.28</td><td>경종3년</td></tr>
+        <tr><td>6대</td><td>온조(穩祖)</td><td>박구용</td><td>2022.3.1 ~ 2025.3.3</td><td>온조4년</td></tr>
+        <tr><td>7대</td><td>혁종(革宗)</td><td>장태선</td><td>2025.3.4 ~</td><td>혁종1년~</td></tr>
+      </tbody>
+    </table>
+    
+    <h2>세자 (교감)</h2>
+    <table>
+    <thead>
+        <tr>
+        <th>세자호</th>
+        <th>이름</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>근성세자(勤誠世子)</td><td>손도연</td></tr>
+        <tr><td>도유세자(道裕世子)</td><td>한영호</td></tr>
+        <tr><td>정산세자(正山世子)</td><td>김상웅</td></tr>
+        <tr><td>명현세자(明賢世子)</td><td>김태일</td></tr>
+        <tr><td>온인세자(溫仁世子)</td><td>박구용</td></tr>
+        <tr><td>헌진세자(獻晉世子)</td><td>장태선</td></tr>
+        <tr><td>예도세자(禮度世子)</td><td>정남호</td></tr>
+    </tbody>
+    </table>
+
+    <h2>청 황제 (이사장)</h2>
+    <table>
+      <tr><th>대수</th><th>묘호</th><th>이름</th><th>재위기간</th></tr>
+      <tr><td>1대</td><td>광현제(光顯帝)</td><td>이근창</td><td>1990.6.13 ~ 1995.10.8</td></tr>
+      <tr><td>2대</td><td>성무제(成武帝)</td><td>이정로</td><td>1995.10.9 ~ 2017.11.30</td></tr>
+      <tr><td>3대</td><td>명헌제(明憲帝)</td><td>이홍로</td><td>2017.12.1 ~</td></tr>
+    </table>
+
+    <h2>군 (君)</h2>
+    <table>
+    <thead>
+        <tr>
+        <th>이름</th>
+        <th>군호</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>이윤세</td><td>정문군(正文君)</td></tr>
+        <tr><td>유영호</td><td>문헌군(文憲君)</td></tr>
+        <tr><td>조은영</td><td>숙정군(淑貞君)</td></tr>
+        <tr><td>진은정</td><td>인숙군(仁淑君)</td></tr>
+        <tr><td>김승우</td><td>무성군(武成君)</td></tr>
+        <tr><td>조남선</td><td>경문군(敬文君)</td></tr>
+        <tr><td>안정미</td><td>온혜군(溫惠君)</td></tr>
+        <tr><td>임미림</td><td>정순군(貞順君)</td></tr>
+        <tr><td>이종남</td><td>충의군(忠義君)</td></tr>
+        <tr><td>김정모</td><td>예문군(禮文君)</td></tr>
+        <tr><td>석지은</td><td>선의군(善義君)</td></tr>
+        <tr><td>김유진</td><td>효숙군(孝淑君)</td></tr>
+        <tr><td>김근욱</td><td>근정군(謹正君)</td></tr>
+        <tr><td>송미순</td><td>정화군(貞和君)</td></tr>
+        <tr><td>유진실</td><td>인성군(仁成君)</td></tr>
+        <tr><td>백선율</td><td>신우군(信祐君)</td></tr>
+        <tr><td>김윤수</td><td>성훈군(成勳君)</td></tr>
+        <tr><td>강대승</td><td>장의군(莊義君)</td></tr>
+        <tr><td>이성훈</td><td>문무군(文武君)</td></tr>
+        <tr><td>이정민</td><td>영성군(永成君)</td></tr>
+        <tr><td>류인선</td><td>경성군(敬成君)</td></tr>
+        <tr><td>송이</td><td>은정군(恩貞君)</td></tr>
+        <tr><td>윤석호</td><td>지헌군(智憲君)</td></tr>
+        <tr><td>이성규</td><td>성현군(聖賢君)</td></tr>
+        <tr><td>이혜연</td><td>혜문군(惠文君)</td></tr>
+        <tr><td>김윤희</td><td>자은군(慈恩君)</td></tr>
+        <tr><td>남승집</td><td>장민군(莊敏君)</td></tr>
+        <tr><td>박동윤</td><td>준의군(俊義君)</td></tr>
+        <tr><td>이만재</td><td>도정군(道正君)</td></tr>
+        <tr><td>송태선</td><td>영헌군(永憲君)</td></tr>
+        <tr><td>이준세</td><td>정우군(貞祐君)</td></tr>
+        <tr><td>서혜영</td><td>숙정군(淑靖君)</td></tr>
+    </tbody>
+    </table>
+
+    <h2>대군 (大君)</h2>
+    <table>
+    <thead>
+        <tr>
+        <th>이름</th>
+        <th>군호</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>오영경</td><td>경무대군(敬武大君)</td></tr>
+        <tr><td>김진성</td><td>지성대군(智成大君)</td></tr>
+        <tr><td>배재열</td><td>충헌대군(忠憲大君)</td></tr>
+        <tr><td>김영경</td><td>문익대군(文翼大君)</td></tr>
+        <tr><td>이효섭</td><td>휘문대군(輝文大君)</td></tr>
+        <tr><td>조환문</td><td>숙의대군(肅義大君)</td></tr>
+        <tr><td>김윤정</td><td>인경대군(仁敬大君)</td></tr>
+        <tr><td>최재황</td><td>정헌대군(正憲大君)</td></tr>
+        <tr><td>최무용</td><td>강성대군(剛成大君)</td></tr>
+        <tr><td>한영호</td><td>문헌대군(文憲大君)</td></tr>
+        <tr><td>김상웅</td><td>정강대군(正剛大君)</td></tr>
+        <tr><td>김태일</td><td>경명대군(敬明大君)</td></tr>
+        <tr><td>박구용</td><td>온문대군(溫文大君)</td></tr>
+        <tr><td>장태선</td><td>경헌대군(敬憲大君)</td></tr>
+        <tr><td>정남호</td><td>예진대군(禮進大君)</td></tr>
+    </tbody>
+    </table>
+
+    <h2>호칭</h2>
+    <table>
+    <thead>
+        <tr>
+        <th>현대에서</th>
+        <th>실록에서</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>1학년</td><td>학도</td></tr>
+        <tr><td>2학년</td><td>유생</td></tr>
+        <tr><td>3학년</td><td>관리</td></tr>
+        <tr><td>재학생</td><td>생도</td></tr>
+        <tr><td>졸업생</td><td>문신</td></tr>
+        <tr><td>체육부장</td><td>좌의정</td></tr>
+        <tr><td>학생부회장</td><td>우의정</td></tr>
+        <tr><td>학생회장</td><td>영의정</td></tr>
+        <tr><td>방송부 출신</td><td>승정원 출신</td></tr>
+        <tr><td>기숙사 출신</td><td>성균관 출신</td></tr>
+        <tr><td>학생회 출신</td><td>무신</td></tr>
+        <tr><td>동아리</td><td>학사</td></tr>
+        <tr><td>버스 기사님</td><td>~호 령사</td></tr>
+        <tr><td>급식 아주머니</td><td>상궁</td></tr>
+        <tr><td>실록 집필자</td><td>사관</td></tr>
+        <tr><td>야자실</td><td>홍문관</td></tr>
+        <tr><td>방과후교실</td><td>향교</td></tr>
+        <tr><td>교실</td><td>서당</td></tr>
+        <tr><td>복도</td><td>저잣거리</td></tr>
+        <tr><td>학교</td><td>학궁</td></tr>
+        <tr><td>버스</td><td>인력거</td></tr>
+    </tbody>
+    </table>
+  </div>
+
+  <script>
+const startTime = Date.now();
+
+const hanjaUnits = '天地玄黃宇宙洪荒日月盈昃辰宿列張寒來暑往秋收冬藏閏餘成歲律呂調陽雲騰致雨露結為霜金生麗水玉出崑岡劍號巨闕珠稱夜光果珍李柰菜重芥薑海鹹河淡鱗潛羽翔龍師火帝鳥官人皇始制文字乃服衣裳'.split('');
+const hanjaPhrases = [
+  '仁者無敵','溫故知新','天高馬肥','學而時習','文武兼備','不恥下問','敬天愛人','知足常樂',
+  '德不孤必有隣','君子之交淡如水','魚我所欲也','風林火山','百聞不如一見','千里之行始於足下',
+  '志不求易事不避難','寧爲鷄口無爲牛後','積善之家必有餘慶','身正不怕影斜','己所不欲勿施於人',
+  '大器晩成','愚公移山','安貧樂道','捨我其誰','三思而後行'
+];
+const count = 60;
+const recentPositions = [];
+
+function randomRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+// 특정 영역(h1)의 좌표를 구해 가림 처리
+const wrapperRect = document.querySelector('.wrapper').getBoundingClientRect();
+const h1Rect = document.querySelector('h1').getBoundingClientRect();
+const blockTop = wrapperRect.top + window.scrollY;
+const blockBottom = h1Rect.bottom + window.scrollY;
+
+function isTooClose(x, y) {
+  return recentPositions.some(pos => Math.abs(pos.x - x) < 60 && Math.abs(pos.y - y) < 60);
+}
+
+function spawnHanja() {
+  // 현재 떠 있는 한자의 수를 센다
+  const currentHanjaCount = document.querySelectorAll('.hanja').length;
+  const hanjaLimit = 50; // 원하는 최대 개수로 설정
+
+  if (currentHanjaCount >= hanjaLimit) return; // 초과 시 생성하지 않음
+
+  const hanja = document.createElement('div');
+  hanja.className = 'hanja';
+
+  const isPhrase = Math.random() < 0.4;
+  hanja.textContent = isPhrase
+    ? hanjaPhrases[Math.floor(Math.random() * hanjaPhrases.length)].split('').join('\n')
+    : hanjaUnits[Math.floor(Math.random() * hanjaUnits.length)];
+
+  let size;
+  if (isPhrase) {
+    const phrase = hanja.textContent.replace(/\n/g, '');
+    size = phrase.length >= 4 ? randomRange(14, 32) : randomRange(20, 60);
+  } else {
+    size = randomRange(20, 72);
+  }
+  hanja.style.fontSize = `${size}px`;
+  hanja.dataset.fontSize = size;
+
+  let x = 0, y = 0, tries = 0;
+  const elapsed = Date.now() - startTime;
+
+  do {
+    x = randomRange(0, window.innerWidth);
+    y = elapsed < 5000
+      ? randomRange(window.scrollY, window.scrollY + window.innerHeight)
+      : randomRange(window.scrollY, window.scrollY + window.innerHeight * 0.3);
+    tries++;
+  } while ((isTooClose(x, y) || (y >= blockTop && y <= blockBottom)) && tries < 30);
+
+  hanja.style.left = `${x}px`;
+  hanja.style.top = `${y}px`;
+  hanja.style.opacity = 0;
+  document.getElementById('hanja-container').appendChild(hanja);
+  recentPositions.push({ x, y });
+
+  animateDrop(hanja);
+}
+
+function animateDrop(el) {
+  const speed = randomRange(0.3, 0.8); // 천천히 떨어짐
+  const size = parseFloat(el.dataset.fontSize);
+  const baseOpacity = (size - 14) / (72 - 14) * (0.28 - 0.08) + 0.08;
+  let y = parseFloat(el.style.top);
+  const fadeStartY = window.innerHeight * 0.6;
+
+  // ✨ 생성 시 부드럽게 등장
+  setTimeout(() => {
+    el.style.transition = 'opacity 0.8s ease';
+    el.style.opacity = baseOpacity;
+  }, 10);
+
+let lifeFrames = 0; // 생성된 프레임 수 카운터
+
+const interval = setInterval(() => {
+  y += speed;
+  el.style.top = `${y}px`;
+  lifeFrames++;
+
+  // 생성 1초 전까지는 무조건 fade-in 유지
+  if (lifeFrames < 50) {
+    el.style.opacity = baseOpacity;
+  } else if (y > fadeStartY) {
+    const ratio = Math.max(0, (window.innerHeight - y) / (window.innerHeight - fadeStartY));
+    el.style.opacity = baseOpacity * ratio;
+  }
+  
+    // fade-out 적용 위치 이후부터만 점점 투명
+    if (y > fadeStartY) {
+      const ratio = Math.max(0, (window.innerHeight - y) / (window.innerHeight - fadeStartY));
+      el.style.opacity = baseOpacity * ratio;
+    }
+
+    // 화면 아래 벗어나면 제거 후 다시 생성
+    if (y > window.innerHeight + 100) {
+      clearInterval(interval);
+      el.remove();
+      spawnHanja();
+    }
+  }, 20);
+}
+
+// 최초 생성
+for (let i = 0; i < count; i++) {
+  spawnHanja();
+}
+
+// 2초마다 추가 한자 생성
+setInterval(() => {
+  spawnHanja();
+  if (Math.random() < 0.5) spawnHanja(); // 50% 확률로 하나 더 생성
+}, 2000);
+
+const musicFiles = [
+  { key: 'music1', file: 'assets/sounds/music1.mp3' },
+  { key: 'music2', file: 'assets/sounds/music2.mp3' },
+  { key: 'music3', file: 'assets/sounds/music3.mp3' },
+  { key: 'music4', file: 'assets/sounds/music4.mp3' }
+];
+
+// 항상 localStorage에서 가장 최신의 곡 key로 audio 생성
+const lastMusicKey = localStorage.getItem('music_key') || 'music1';
+const lastTime = parseFloat(localStorage.getItem('music_time') || '0');
+const musicInfo = musicFiles.find(m => m.key === lastMusicKey) || musicFiles[0];
+const audio = new Audio(musicInfo.file);
+audio.loop = true;
+audio.currentTime = lastTime;
+
+// 자동 재생 여부 체크
+if (localStorage.getItem('music_playing') === 'true') {
+  audio.play();
+}
+
+// playMusic 함수는 무조건 localStorage.music_key를 최신 값으로!
+function playMusic(key) {
+  const info = musicFiles.find(m => m.key === key);
+  if (!info) return;
+
+  if (audio.src.includes(info.file)) {
+    // 이미 같은 곡을 선택했을 때 (토글 재생/정지)
+    if (audio.paused) {
+      audio.play();
+      localStorage.setItem('music_playing', 'true');
+    } else {
+      audio.pause();
+      localStorage.setItem('music_playing', 'false');
+    }
+    // 무조건 현재 곡 key 저장!
+    localStorage.setItem('music_key', key);
+    localStorage.setItem('music_time', audio.currentTime);
+  } else {
+    // 곡이 바뀌면 새로운 곡으로 세팅
+    audio.pause();
+    audio.src = info.file;
+    audio.currentTime = 0;
+    audio.play();
+    localStorage.setItem('music_key', key);
+    localStorage.setItem('music_time', 0);
+    localStorage.setItem('music_playing', 'true');
+  }
+}
+
+// 버튼 이벤트 할당 (중복 정의/함수 선언 NO)
+document.getElementById('infoText1').onclick = () => playMusic('music1');
+document.getElementById('infoText2').onclick = () => playMusic('music2');
+document.getElementById('infoText3').onclick = () => playMusic('music3');
+document.getElementById('infoText4').onclick = () => playMusic('music4');
+
+// audio 상태가 변할 때마다 항상 최신값 저장!
+audio.addEventListener('pause', () => {
+  localStorage.setItem('music_playing', 'false');
+  localStorage.setItem('music_time', audio.currentTime);
+  // 현재 곡이 뭔지 항상 반영
+  const currentKey = musicFiles.find(m => audio.src.includes(m.file))?.key;
+  if (currentKey) localStorage.setItem('music_key', currentKey);
+});
+audio.addEventListener('play', () => {
+  localStorage.setItem('music_playing', 'true');
+  // 현재 곡이 뭔지 항상 반영
+  const currentKey = musicFiles.find(m => audio.src.includes(m.file))?.key;
+  if (currentKey) localStorage.setItem('music_key', currentKey);
+});
+
+// 페이지 떠날 때 항상 최신 음악 정보를 저장
+window.addEventListener('beforeunload', () => {
+  localStorage.setItem('music_time', audio.currentTime);
+  localStorage.setItem('music_playing', !audio.paused ? 'true' : 'false');
+  const currentKey = musicFiles.find(m => audio.src.includes(m.file))?.key;
+  if (currentKey) localStorage.setItem('music_key', currentKey);
+});
+
+  </script>
+</body>
+</html>
